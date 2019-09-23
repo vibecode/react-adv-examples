@@ -1,26 +1,50 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import './index.css'
+import React, { Component } from 'react'
+import { FaPlay } from 'react-icons/fa'
+import { FaPause } from 'react-icons/fa'
+import { FaForward } from 'react-icons/fa'
+import { FaBackward } from 'react-icons/fa'
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class RadioGroup extends Component {
+  render() {
+    return (
+      <fieldset className="radio-group">
+        <legend>{this.props.legend}</legend>
+        {this.props.children}
+      </fieldset>
+    )
+  }
 }
 
-export default App;
+class RadioButton extends Component {
+  render() {
+    const isActive = false // <-- should come from somewhere
+    const className = 'radio-button ' + (isActive ? 'active' : '')
+    return <button className={className}>{this.props.children}</button>
+  }
+}
+
+class App extends Component {
+  render() {
+    return (
+      <div>
+        <RadioGroup legend="Radio Group">
+          <RadioButton value="back">
+            <FaBackward />
+          </RadioButton>
+          <RadioButton value="play">
+            <FaPlay />
+          </RadioButton>
+          <RadioButton value="pause">
+            <FaPause />
+          </RadioButton>
+          <RadioButton value="forward">
+            <FaForward />
+          </RadioButton>
+        </RadioGroup>
+      </div>
+    )
+  }
+}
+
+export default App
