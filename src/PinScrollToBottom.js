@@ -2,7 +2,6 @@ import { Component } from 'react'
 
 export default class PinScrollToBottom extends Component {
   componentDidMount() {
-    console.log('called')
     this.scroll()
   }
 
@@ -19,7 +18,6 @@ export default class PinScrollToBottom extends Component {
   }
 
   scroll() {
-    console.log('called')
     window.scrollTo(0, document.documentElement.scrollHeight)
   }
 
