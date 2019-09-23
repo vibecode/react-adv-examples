@@ -6,11 +6,24 @@ import { FaForward } from 'react-icons/fa'
 import { FaBackward } from 'react-icons/fa'
 
 class RadioGroup extends Component {
+  state = {
+    value: this.props.defaultValue
+  }
+
   render() {
     return (
       <fieldset className="radio-group">
         <legend>{this.props.legend}</legend>
-        {this.props.children}
+        {React.Children.map(this.props.children, child => {
+          return React.cloneElement(child, {
+            isActive: this.state.value === child.props.value,
+            onClick: value => {
+              this.setState({
+                value: child.props.value
+              })
+            }
+          })
+        })}
       </fieldset>
     )
   }
@@ -18,9 +31,13 @@ class RadioGroup extends Component {
 
 class RadioButton extends Component {
   render() {
-    const isActive = false // <-- should come from somewhere
+    const { isActive, children } = this.props
     const className = 'radio-button ' + (isActive ? 'active' : '')
-    return <button className={className}>{this.props.children}</button>
+    return (
+      <button className={className} onClick={this.props.onClick}>
+        {children}
+      </button>
+    )
   }
 }
 
@@ -28,7 +45,7 @@ class App extends Component {
   render() {
     return (
       <div>
-        <RadioGroup legend="Radio Group">
+        <RadioGroup legend="Radio Group" defaultValue={'pause'}>
           <RadioButton value="back">
             <FaBackward />
           </RadioButton>
