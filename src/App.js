@@ -45,7 +45,6 @@ Good luck!
 
 import './index.css'
 import React from 'react'
-import * as PropTypes from 'prop-types'
 import podcast from './podcast.mp3'
 import mario from './mariobros.mp3'
 import { FaPause } from 'react-icons/fa'
@@ -56,43 +55,68 @@ import { FaUndo } from 'react-icons/fa'
 const Context = React.createContext()
 
 class AudioPlayer extends React.Component {
-  setTime = time => this.setState({ audio: { currentTime: time } })
-  jump = by =>
-    this.setState(state => ({
-      audio: {
-        currentTime: state.audio.currentTime + by
-      }
-    }))
+  setTime = time => {
+    this.audio.currentTime = time
+  }
+
+  jump = by => {
+    this.audio.currentTime = this.audioCtx.currentTime + by
+  }
+
   play = () => {
-    this.setState({ audio: { isPlaying: true } })
+    const { audioCtx } = this
+    audioCtx.isPlaying = true
+    this.setState({ audioCtx })
     this.audio.play()
   }
   pause = () => {
-    this.setState({ audio: { isPlaying: false } })
+    const { audioCtx } = this
+    audioCtx.isPlaying = false
+    this.setState({ audioCtx })
     this.audio.pause()
   }
 
-  state = {
-    audio: {
-      isPlaying: false,
-      duration: null,
-      currentTime: 0,
-      loaded: false,
-      play: this.play,
-      pause: this.pause,
-      setTime: this.setTime,
-      jump: this.jump
-    }
+  handleTimeUpdate = e => {
+    const { audioCtx } = this
+    audioCtx.currentTime = this.audio.currentTime
+    audioCtx.duration = this.audio.duration
+    this.setState({ audioCtx })
   }
+
+  handleAudioLoaded = e => {
+    const { audioCtx } = this
+    audioCtx.duration = this.audio.duration
+    audioCtx.loaded = true
+    this.setState({ audioCtx })
+  }
+
+  handleEnded = () => {
+    const { audioCtx } = this
+    audioCtx.isPlaying = false
+    this.setState({ audioCtx })
+  }
+
+  audioCtx = {
+    isPlaying: false,
+    duration: null,
+    currentTime: 0,
+    loaded: false,
+    play: this.play,
+    pause: this.pause,
+    setTime: this.setTime,
+    jump: this.jump
+  }
+
+  state = { audioCtx: this.audioCtx }
 
   render() {
     return (
       <div className="audio-player">
         <audio
           src={this.props.source}
-          onTimeUpdate={null}
-          onLoadedData={null}
-          onEnded={null}
+          onTimeUpdate={this.handleTimeUpdate}
+          onLoadedData={this.handleAudioLoaded}
+          onEnded={this.handleEnded}
           ref={n => (this.audio = n)}
         />
         <Context.Provider value={this.state}>
@@ -107,11 +131,11 @@ class Play extends React.Component {
   render() {
     return (
       <Context.Consumer>
-        {({ audio }) => (
+        {({ audioCtx }) => (
           <button
             className="icon-button"
-            onClick={audio.play}
-            disabled={null}
+            onClick={audioCtx.play}
+            disabled={audioCtx.isPlaying}
             title="play"
           >
             <FaPlay />
@@ -125,35 +149,46 @@ class Play extends React.Component {
 class Pause extends React.Component {
   render() {
     return (
-      <button
-        className="icon-button"
-        onClick={null}
-        disabled={null}
-        title="pause"
-      >
-        <FaPause />
-      </button>
+      <Context.Consumer>
+        {({ audioCtx }) => (
+          <button
+            className="icon-button"
+            onClick={audioCtx.pause}
+            disabled={!audioCtx.isPlaying}
+            title="pause"
+          >
+            <FaPause />
+          </button>
+        )}
+      </Context.Consumer>
     )
   }
 }
 
 class PlayPause extends React.Component {
+  static contextType = Context
+
   render() {
-    return null
+    const { isPlaying } = this.context.audioCtx
+    return isPlaying ? <Pause /> : <Play />
   }
 }
 
 class JumpForward extends React.Component {
   render() {
     return (
-      <button
-        className="icon-button"
-        onClick={null}
-        disabled={null}
-        title="Forward 10 Seconds"
-      >
-        <FaRedo />
-      </button>
+      <Context.Consumer>
+        {({ audioCtx }) => (
+          <button
+            className="icon-button"
+            onClick={() => audioCtx.jump(10)}
+            disabled={!audioCtx.isPlaying}
+            title="Forward 10 Seconds"
+          >
+            <FaRedo />
+          </button>
+        )}
+      </Context.Consumer>
     )
   }
 }
@@ -161,22 +196,39 @@ class JumpForward extends React.Component {
 class JumpBack extends React.Component {
   render() {
     return (
-      <button
-        className="icon-button"
-        onClick={null}
-        disabled={null}
-        title="Back 10 Seconds"
-      >
-        <FaUndo />
-      </button>
+      <Context.Consumer>
+        {({ audioCtx }) => (
+          <button
+            className="icon-button"
+            onClick={() => audioCtx.jump(-10)}
+            disabled={!audioCtx.isPlaying}
+            title="Back 10 Seconds"
+          >
+            <FaUndo />
+          </button>
+        )}
+      </Context.Consumer>
     )
   }
 }
 
 class Progress extends React.Component {
+  static contextType = Context
+
+  handleClick = e => {
+    const { audioCtx } = this.context
+    const rect = this.node.getBoundingClientRect()
+    const relativeLeft = e.clientX - rect.left
+    audioCtx.setTime((relativeLeft / rect.width) * audioCtx.duration)
+  }
+
   render() {
     return (
-      <div className="progress" onClick={null}>
+      <div
+        className="progress"
+        ref={n => (this.node = n)}
+        onClick={this.handleClick}
+      >
         <div
           className="progress-bar"
           style={{
