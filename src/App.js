@@ -223,6 +223,7 @@ class Progress extends React.Component {
   }
 
   render() {
+    const { loaded, duration, currentTime } = this.context.audioCtx
     return (
       <div
         className="progress"
@@ -232,7 +233,7 @@ class Progress extends React.Component {
         <div
           className="progress-bar"
           style={{
-            width: '23%'
+            width: loaded ? `${(currentTime / duration) * 100}%` : '0%'
           }}
         />
       </div>
