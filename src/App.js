@@ -1,26 +1,52 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import './index.css'
+import React from 'react'
+import { Router, Route, Link } from './mini-router'
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+const App = () => (
+  <Router>
+    <div>
+      <ul>
+        <li><Link to="/">Home</Link></li>
+        <li><Link to="/dashboard">Dashboard</Link></li>
+        <li><Link to="/about">About</Link></li>
+        <li><Link to="/topics">Topics</Link></li>
+      </ul>
+
+      <hr/>
+
+      <Route exact path="/" render={() => (
+        <div>
+          <h2>Home</h2>
+        </div>
+      )}/>
+      <Route path="/dashboard" component={Dashboard}/>
+      <Route path="/about" component={About}/>
+      <Route path="/topics" component={Topics}/>
     </div>
-  );
-}
+  </Router>
+)
 
-export default App;
+const Dashboard = () => (
+  <div>
+    <h2>Dashboard</h2>
+  </div>
+)
+
+const About = () => (
+  <div>
+    <h2>About</h2>
+  </div>
+)
+
+const Topics = ({ match }) => (
+  <div>
+    <h2>Topics</h2>
+    <ul>
+      <li>Rendering with React</li>
+      <li>Components</li>
+      <li>Props v. State</li>
+    </ul>
+  </div>
+)
+
+export default App
